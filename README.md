@@ -2,6 +2,8 @@
 
 [madeintbay.ca](https://www.madeintbay.ca) — A simple list of websites that were made in beautiful Thunder Bay, Ontario, Canada.
 
+(Forked from https://github.com/dohnutt/madeinthesoo)
+
 ---
 
 ## Why is this a thing?
