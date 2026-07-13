@@ -53,48 +53,61 @@
 					<a href="https://thunderbay.wiki" target="_blank" rel="noopener"
 						>https://thunderbay.wiki</a
 					>
-					by
-					<a href="https://www.michaelcurrie.com" target="_blank" rel="noopener"
-						>Michael B. Currie</a
+					<span class="author"
+						>by
+						<a href="https://www.michaelcurrie.com" target="_blank" rel="noopener"
+							>Michael B. Currie</a
+						></span
 					>
 				</li>
 				<li>
 					<a href="https://citycouncilmatters.ca" target="_blank" rel="noopener"
 						>https://citycouncilmatters.ca</a
 					>
-					by <a href="https://tfcustom.ca/about/" target="_blank" rel="noopener">Taren Francisco</a>
+					<span class="author"
+						>by
+						<a href="https://tfcustom.ca/about/" target="_blank" rel="noopener"
+							>Taren Francisco</a
+						></span
+					>
 				</li>
 				<li>
 					<a href="https://justthemenu.ca/" target="_blank" rel="noopener"
 						>https://justthemenu.ca/</a
 					>
-					by
-					<a
-						href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
-						target="_blank"
-						rel="noopener"
-						>Stephen Garstin</a
+					<span class="author"
+						>by
+						<a
+							href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
+							target="_blank"
+							rel="noopener"
+							>Stephen Garstin</a
+						></span
 					>
 				</li>
 				<li>
 					<a href="https://thundercitizen.ca/" target="_blank" rel="noopener"
 						>https://thundercitizen.ca/</a
 					>
-					by
-					<a href="https://www.linkedin.com/in/eric-richardson/" target="_blank" rel="noopener"
-						>Eric Richardson</a
+					<span class="author"
+						>by
+						<a href="https://www.linkedin.com/in/eric-richardson/" target="_blank" rel="noopener"
+							>Eric Richardson</a
+						></span
 					>
 				</li>
 				<li>
 					<a href="https://www.tbaytech.club/" target="_blank" rel="noopener"
 						>https://www.tbaytech.club/</a
 					>
-					by
-					<a
-						href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
-						target="_blank"
-						rel="noopener"
-						>Stephen Garstin</a
+					<span class="author"
+						>by
+						<a
+							href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
+							target="_blank"
+							rel="noopener"
+							>Stephen Garstin</a
+						></span
 					>
 				</li>
 			</ul>
@@ -160,6 +173,19 @@
 		</footer>
 
 		<script>
+			// Randomize the site order on every load so no single listing is
+			// permanently first. Fisher-Yates shuffle, then re-append in the new
+			// order (appendChild moves existing nodes rather than cloning them).
+			(function shuffleSites() {
+				const list = document.getElementById("sites");
+				const items = Array.from(list.children);
+				for (let i = items.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[items[i], items[j]] = [items[j], items[i]];
+				}
+				items.forEach((item) => list.appendChild(item));
+			})();
+
 			document.addEventListener("input", function (e) {
 				if (e.target.id === "search") {
 					const query = e.target.value.toLowerCase();

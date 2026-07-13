@@ -185,6 +185,11 @@ a.muted,
 	white-space: nowrap;
 }
 
+.author {
+	font-size: 0.8em;
+	color: #666;
+}
+
 #sites li:before {
 	content: "" / "Thunder Bay flag";
 	width: 1.4em;
