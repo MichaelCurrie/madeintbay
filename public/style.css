@@ -125,6 +125,10 @@ h1 {
 	font-weight: 700;
 	letter-spacing: -0.03em;
 	margin-inline-start: -0.05em;
+	/* The h1 is the first element on the page, so any top margin here adds to the
+	   body padding to set the space above the title. The body padding alone is the
+	   intended frame, so this heading contributes no top margin of its own. */
+	margin-block-start: 0;
 	line-height: 1;
 }
 
