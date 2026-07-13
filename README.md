@@ -1,4 +1,4 @@
-# Made in Thunder Bay 🇨🇦
+# madeintbay.ca
 
 [madeintbay.ca](https://www.madeintbay.ca) — A simple list of websites that were made in beautiful Thunder Bay, Ontario, Canada.
 
