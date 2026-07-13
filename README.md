@@ -24,7 +24,7 @@ To be listed, a website must meet the following criteria:
 
 ## I'd like my site listed on here.
 
-1. [Send me an email](mcurrie@gmail.com) or [create a pull request](https://github.com/MichaelCurrie/madeintbay/pulls)—whichever you're most comfortable with. Include your name, your website URL, and some context about what the site is.
+1. [Send me an email](mailto:mcurrie@gmail.com) or [create a pull request](https://github.com/MichaelCurrie/madeintbay/pulls)—whichever you're most comfortable with. Include your name, your website URL, and some context about what the site is.
 
 2. Optionally add this code somewhere on your site:
 
