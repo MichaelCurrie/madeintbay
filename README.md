@@ -7,12 +7,26 @@
 The FAQ (why this exists, listing criteria, how to get added) lives on the page itself; see [`public/index.html`](public/index.html). 
 
 To add your site, just make a Pull Request editing [`public/sites.csv`](public/sites.csv).
+## How it Works (Step-by-Step Flow)
 
-## How it's published
+### Architecture
 
-The site is plain static HTML/CSS/JS in [`public/`](public/) with no server-side build step.
+When a user visits `madeintbay.ca`, this is what happens:
 
-Your browser will run [`public/js/main.js`](public/js/main.js) which parses [`public/sites.csv`](public/sites.csv) with [PapaParse](https://www.papaparse.com/) (vendored at [`public/js/papaparse.min.js`](public/js/papaparse.min.js) so there is no third-party request) and renders one card per row.
+| Step | Component | Action | Description |
+| :--- | :--- | :--- | :--- |
+| **1** | **Client Browser** | **DNS Query** | Initiates a DNS lookup for `madeintbay.ca`. |
+| **2** | **Cloudflare DNS** | **DNS Resolution** | Resolves the domain query, returning the authoritative IP addresses for GitHub Pages edge servers. |
+| **3** | **Client Browser** | **HTTP GET Request** | Establishes a TLS connection and sends an HTTP GET request for the root path (`/`) to the GitHub Pages IP. |
+| **4** | **GitHub Pages** | **Static File Delivery** | Validates the incoming host header against the repository's `CNAME` file, maps the request to the `public/` directory, and serves the static assets (`index.html`, `JS`, `CSS`) verbatim. |
+| **5** | **Client Browser** | **Asset Parsing** | Parses the DOM, fetches `public/js/main.js`, and begins client-side execution. |
+| **6** | **Client Browser (PapaParse)** | **Local Data Fetch & Parse** | Execution of `main.js` triggers a local fetch for `public/sites.csv`. The vendored `papaparse.min.js` library parses the CSV payload directly in the browser memory. |
+| **7** | **Client Browser** | **DOM Manipulation** | Iterates through the parsed JSON objects array generated from the CSV data, dynamically constructing and injecting a card element into the DOM for each row. |
 
-- **Web server: GitHub Pages.** On every push to `main`, [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) uploads `public/` verbatim and deploys it to GitHub Pages (repo Settings → Pages → Source = GitHub Actions).
-- **Domain + DNS: Cloudflare.** `madeintbay.ca` is registered with Cloudflare Registrar, and its DNS is hosted at Cloudflare, which points the domain at GitHub Pages. The custom domain is pinned by [`public/CNAME`](public/CNAME).
+---
+
+### Component Responsibilities
+
+* **Cloudflare:** Handles DNS management and edge routing, pointing the custom apex domain to the GitHub Pages infrastructure.
+* **GitHub Pages:** Acts exclusively as a static web server. It performs no server-side preprocessing or runtime build steps; it responds to HTTP requests by serving files directly from disk.
+* **Client Browser:** Handles 100% of the runtime computing. Because there is no backend compilation, the client asset pipeline is entirely responsible for data parsing, business logic, and UI rendering.
