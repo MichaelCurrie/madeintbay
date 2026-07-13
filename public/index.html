@@ -12,14 +12,16 @@
 	<meta property="og:url" content="https://madeintbay.ca/" />
 	<meta property="og:site_name" content="Made in Thunder Bay 🇨🇦" />
 	<meta property="og:image" content="https://madeintbay.ca/img/opengraph.jpg" />
+	<link rel="icon" href="favicon.ico" sizes="any">
+	<link rel="icon" href="img/flag_tbay.webp" type="image/webp">
 	<link href="style.css" rel="stylesheet" >
 </head>
 
 <body>
 
 	<header class="header container">
-		<h1>Made in TBay 🇨🇦</h1>
-		<p class="lede">A simple list of websites that were made in beautiful Thunder Bay, Ontario. <a href="#faq"><em>Why?</em></a></p>
+		<h1>Made in TBay <img src="img/flag_tbay.webp" class="flag" width="64" height="32" alt="Thunder Bay flag"></h1>
+		<p class="lede">A simple list of websites that were made in beautiful <a href="https://thunderbay.wiki/wiki/Thunder_Bay">Thunder Bay, Ontario</a>. <a href="#faq"><em>Why?</em></a></p>
 	</header>
 
 	<main class="container">
@@ -30,9 +32,11 @@
 		</div>
 
 		<ul id="sites" aria-live="polite">
-			<li><a href="https://thunderbay.wiki" target="_blank" rel="noopener">https://thunderbay.wiki</a></li>
-			<li><a href="https://citycouncilmatters.ca" target="_blank" rel="noopener">https://citycouncilmatters.ca</a></li>
-			<li><a href="https://justthemenu.ca/" target="_blank" rel="noopener">https://justthemenu.ca/</a></li>
+			<li><a href="https://thunderbay.wiki" target="_blank" rel="noopener">https://thunderbay.wiki</a> by <a href="https://www.michaelcurrie.com" target="_blank" rel="noopener">Michael B. Currie</a></li>
+			<li><a href="https://citycouncilmatters.ca" target="_blank" rel="noopener">https://citycouncilmatters.ca</a> by <a href="https://tfcustom.ca/about/" target="_blank" rel="noopener">Taren Francisco</a></li>
+			<li><a href="https://justthemenu.ca/" target="_blank" rel="noopener">https://justthemenu.ca/</a> by <a href="https://www.linkedin.com/in/stephen-garstin-80358b2b2" target="_blank" rel="noopener">Stephen Garstin</a></li>
+			<li><a href="https://thundercitizen.ca/" target="_blank" rel="noopener">https://thundercitizen.ca/</a> by <a href="https://www.linkedin.com/in/eric-richardson/" target="_blank" rel="noopener">Eric Richardson</a></li>
+			<li><a href="https://www.tbaytech.club/" target="_blank" rel="noopener">https://www.tbaytech.club/</a> by <a href="https://www.linkedin.com/in/stephen-garstin-80358b2b2" target="_blank" rel="noopener">Stephen Garstin</a></li>
 		</ul>
 
 		<div id="no-results" aria-live="assertive" aria-atomic="true"></div>
@@ -105,15 +109,6 @@
 			}
 		}
 	});
-	</script>
-
-	<script>
-	const flagEmojiToPNG = (flag) => {
-		var countryCode = Array.from(flag, (codeUnit) => codeUnit.codePointAt()).map(char => String.fromCharCode(char-127397).toLowerCase()).join('')
-		return '<img src="img/flag.png" class="flag">';
-	}
-    var reg = new RegExp('(?:\ud83c[\udde6-\uddff]){2}', 'g');
-    document.body.innerHTML = document.body.innerHTML.replaceAll(reg, flagEmojiToPNG);
 	</script>
 
 	<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2HMRXKDL4"></script>

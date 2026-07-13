@@ -83,9 +83,11 @@ li + li {
 }
 
 .flag {
-	width: 1em;
+	display: inline-block;
+	width: 1.15em;
 	height: auto;
-	vertical-align: middle;
+	aspect-ratio: 2 / 1;
+	vertical-align: -0.1em;
 }
 
 .sr-only {
@@ -179,17 +181,16 @@ input[type="search"] {
 }
 
 #sites li:before {
-	content: '' / 'Canada flag';
-	width: 1em;
-	height: 1em;
+	content: '' / 'Thunder Bay flag';
+	width: 1.4em;
+	height: 0.7em;
 	display: inline-block;
 	vertical-align: middle;
-	background-image: url('./img/flag.png');
-	background-size: 1em;
+	background-image: url('./img/flag_tbay.webp');
+	background-size: contain;
 	background-position: center;
 	background-repeat: no-repeat;
 	margin-inline-end: 0.5em;
-	font-size: 0.85em;
 }
 #sites li + li {
 	margin-block-start: 0;
