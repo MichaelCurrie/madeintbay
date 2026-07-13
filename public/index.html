@@ -1,117 +1,187 @@
 <!doctype html>
 <html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Made in TBay 🇨🇦</title>
-	<meta name="description" content="A simple list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦"/>
-	<meta property="og:locale" content="en_CA" />
-	<meta property="og:type" content="website" />
-	<meta property="og:title" content="Made with ❤ in Thunder Bay" />
-	<meta property="og:description" content="A simple list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦" />
-	<meta property="og:url" content="https://madeintbay.ca/" />
-	<meta property="og:site_name" content="Made in Thunder Bay 🇨🇦" />
-	<meta property="og:image" content="https://madeintbay.ca/img/opengraph.jpg" />
-	<link rel="icon" href="favicon.ico" sizes="any">
-	<link rel="icon" href="img/flag_tbay.webp" type="image/webp">
-	<link href="style.css" rel="stylesheet" >
-</head>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Made in TBay 🇨🇦</title>
+		<meta
+			name="description"
+			content="A simple list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦"
+		/>
+		<meta property="og:locale" content="en_CA" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="Made with ❤ in Thunder Bay" />
+		<meta
+			property="og:description"
+			content="A simple list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦"
+		/>
+		<meta property="og:url" content="https://madeintbay.ca/" />
+		<meta property="og:site_name" content="Made in Thunder Bay 🇨🇦" />
+		<meta property="og:image" content="https://madeintbay.ca/img/opengraph.jpg" />
+		<link rel="icon" href="favicon.ico" sizes="any" />
+		<link rel="icon" href="img/flag_tbay.webp" type="image/webp" />
+		<link href="style.css" rel="stylesheet" />
+	</head>
 
-<body>
+	<body>
+		<header class="header container">
+			<h1>
+				Made in TBay
+				<img src="img/flag_tbay.webp" class="flag" width="64" height="32" alt="Thunder Bay flag" />
+			</h1>
+			<p class="lede">
+				A simple list of websites that were made in beautiful
+				<a href="https://thunderbay.wiki/wiki/Thunder_Bay">Thunder Bay, Ontario</a>.
+				<a href="#faq"><em>Why?</em></a>
+			</p>
+		</header>
 
-	<header class="header container">
-		<h1>Made in TBay <img src="img/flag_tbay.webp" class="flag" width="64" height="32" alt="Thunder Bay flag"></h1>
-		<p class="lede">A simple list of websites that were made in beautiful <a href="https://thunderbay.wiki/wiki/Thunder_Bay">Thunder Bay, Ontario</a>. <a href="#faq"><em>Why?</em></a></p>
-	</header>
+		<main class="container">
+			<div class="input-group">
+				<label for="search" class="sr-only">Search for a site</label>
+				<input
+					type="search"
+					class="form-control"
+					placeholder="Search for a site&hellip;"
+					id="search"
+					aria-label="Search for a site"
+				/>
+			</div>
 
-	<main class="container">
-
-		<div class="input-group">
-			<label for="search" class="sr-only">Search for a site</label>
-			<input type="search" class="form-control" placeholder="Search for a site&hellip;" id="search" aria-label="Search for a site">
-		</div>
-
-		<ul id="sites" aria-live="polite">
-			<li><a href="https://thunderbay.wiki" target="_blank" rel="noopener">https://thunderbay.wiki</a> by <a href="https://www.michaelcurrie.com" target="_blank" rel="noopener">Michael B. Currie</a></li>
-			<li><a href="https://citycouncilmatters.ca" target="_blank" rel="noopener">https://citycouncilmatters.ca</a> by <a href="https://tfcustom.ca/about/" target="_blank" rel="noopener">Taren Francisco</a></li>
-			<li><a href="https://justthemenu.ca/" target="_blank" rel="noopener">https://justthemenu.ca/</a> by <a href="https://www.linkedin.com/in/stephen-garstin-80358b2b2" target="_blank" rel="noopener">Stephen Garstin</a></li>
-			<li><a href="https://thundercitizen.ca/" target="_blank" rel="noopener">https://thundercitizen.ca/</a> by <a href="https://www.linkedin.com/in/eric-richardson/" target="_blank" rel="noopener">Eric Richardson</a></li>
-			<li><a href="https://www.tbaytech.club/" target="_blank" rel="noopener">https://www.tbaytech.club/</a> by <a href="https://www.linkedin.com/in/stephen-garstin-80358b2b2" target="_blank" rel="noopener">Stephen Garstin</a></li>
-		</ul>
-
-		<div id="no-results" aria-live="assertive" aria-atomic="true"></div>
-
-	</main>
-
-	<section id="faq" class="my-4 container">
-		<details name="faq" open>
-			<summary>Why is this a thing?</summary>
-
-			<p>Thunder Bay is a great place to call home, and it's full of talented web designers, web developers, programmers, UI and UX designers. The goals are:</p>
-			<ul>
-				<li><strong>to empower local developers and designers;</strong></li>
-				<li>to highlight the Thunder Bay tech community;</li>
-				<li>and to raise awareness about the talent in Thunder Bay.</li>
-			</ul>
-		</details>
-
-		<details name="faq">
-			<summary>How do you decide which sites to list?</summary>
-			<p>To be listed, a website must meet the following criteria:</p>
-			<ul>
-				<li>It must have been designed and developed in Thunder Bay, Ontario, Canada.</li>
-				<li>It must be a website for an individual, a business, or an organization based in Thunder Bay.</li>
-				<li>It must be a website that is live and publicly accessible.</li>
-			</ul>
-		</details>
-
-		<details name="faq">
-			<summary>I'd like my site listed on here.</summary>
-			<ol>
+			<ul id="sites" aria-live="polite">
 				<li>
-					<a href="mailto:mcurrie@gmail.com?subject=I%27d%20like%20my%20site%20listed%20on%20madeintbay%2Eca">Send me an email</a> or <a href="https://github.com/MichaelCurrie/madeintbay">create a pull request</a>—whichever you're most comfortable with. Include your name, your website URL, and some context about what the site is.
+					<a href="https://thunderbay.wiki" target="_blank" rel="noopener"
+						>https://thunderbay.wiki</a
+					>
+					by
+					<a href="https://www.michaelcurrie.com" target="_blank" rel="noopener"
+						>Michael B. Currie</a
+					>
 				</li>
 				<li>
-					<em>Optionally</em> add this code somewhere on your site:
-					<pre>&lt;a href="https://madeintbay.ca/"&gt;Made in Thunder Bay 🇨🇦&lt;&#47;a&gt;</pre>
+					<a href="https://citycouncilmatters.ca" target="_blank" rel="noopener"
+						>https://citycouncilmatters.ca</a
+					>
+					by <a href="https://tfcustom.ca/about/" target="_blank" rel="noopener">Taren Francisco</a>
 				</li>
-			</ol>
-		</details>
-	</section>
+				<li>
+					<a href="https://justthemenu.ca/" target="_blank" rel="noopener"
+						>https://justthemenu.ca/</a
+					>
+					by
+					<a
+						href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
+						target="_blank"
+						rel="noopener"
+						>Stephen Garstin</a
+					>
+				</li>
+				<li>
+					<a href="https://thundercitizen.ca/" target="_blank" rel="noopener"
+						>https://thundercitizen.ca/</a
+					>
+					by
+					<a href="https://www.linkedin.com/in/eric-richardson/" target="_blank" rel="noopener"
+						>Eric Richardson</a
+					>
+				</li>
+				<li>
+					<a href="https://www.tbaytech.club/" target="_blank" rel="noopener"
+						>https://www.tbaytech.club/</a
+					>
+					by
+					<a
+						href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
+						target="_blank"
+						rel="noopener"
+						>Stephen Garstin</a
+					>
+				</li>
+			</ul>
 
-	<footer class="footer mt-4 container">
-		<ul class="list-inline muted">
-			<li><a href="https://github.com/MichaelCurrie/madeintbay/">View on GitHub</a></li>
-			<li><a href="/">Made in Thunder Bay 🇨🇦</a></li>
-			<li><a href="https://www.madeinthesoo.ca/">Inspired by https://madeinthesoo.ca</a></li>
-		</ul>
-	</footer>
+			<div id="no-results" aria-live="assertive" aria-atomic="true"></div>
+		</main>
 
-	<script>
-	document.addEventListener('input', function(e) {
-		if (e.target.id === 'search') {
-			const query = e.target.value.toLowerCase();
+		<section id="faq" class="my-4 container">
+			<details name="faq" open>
+				<summary>Why is this a thing?</summary>
 
-			document.querySelectorAll('#sites li').forEach(site => {
-				const siteText = site.textContent.toLowerCase();
-				if (siteText.includes(query)) {
-					site.style.display = '';
-				} else {
-					site.style.display = 'none';
+				<p>
+					Thunder Bay is a great place to call home, and it's full of talented web designers, web
+					developers, programmers, UI and UX designers. The goals are:
+				</p>
+				<ul>
+					<li><strong>to empower local developers and designers;</strong></li>
+					<li>to highlight the Thunder Bay tech community;</li>
+					<li>and to raise awareness about the talent in Thunder Bay.</li>
+				</ul>
+			</details>
+
+			<details name="faq">
+				<summary>How do you decide which sites to list?</summary>
+				<p>To be listed, a website must meet the following criteria:</p>
+				<ul>
+					<li>It must have been designed and developed in Thunder Bay, Ontario, Canada.</li>
+					<li>
+						It must be a website for an individual, a business, or an organization based in Thunder
+						Bay.
+					</li>
+					<li>It must be a website that is live and publicly accessible.</li>
+				</ul>
+			</details>
+
+			<details name="faq">
+				<summary>I'd like my site listed on here.</summary>
+				<ol>
+					<li>
+						<a
+							href="mailto:mcurrie@gmail.com?subject=I%27d%20like%20my%20site%20listed%20on%20madeintbay%2Eca"
+							>Send me an email</a
+						>
+						or
+						<a href="https://github.com/MichaelCurrie/madeintbay">create a pull request</a
+						>—whichever you're most comfortable with. Include your name, your website URL, and some
+						context about what the site is.
+					</li>
+					<li>
+						<em>Optionally</em> add this code somewhere on your site:
+						<pre>&lt;a href="https://madeintbay.ca/"&gt;Made in Thunder Bay 🇨🇦&lt;&#47;a&gt;</pre>
+					</li>
+				</ol>
+			</details>
+		</section>
+
+		<footer class="footer mt-4 container">
+			<ul class="list-inline muted">
+				<li><a href="https://github.com/MichaelCurrie/madeintbay/">View on GitHub</a></li>
+				<li><a href="/">Made in Thunder Bay 🇨🇦</a></li>
+				<li><a href="https://www.madeinthesoo.ca/">Inspired by https://madeinthesoo.ca</a></li>
+			</ul>
+		</footer>
+
+		<script>
+			document.addEventListener("input", function (e) {
+				if (e.target.id === "search") {
+					const query = e.target.value.toLowerCase();
+
+					document.querySelectorAll("#sites li").forEach((site) => {
+						const siteText = site.textContent.toLowerCase();
+						if (siteText.includes(query)) {
+							site.style.display = "";
+						} else {
+							site.style.display = "none";
+						}
+					});
+
+					const count = document.querySelectorAll('#sites li:not([style*="none"])').length;
+					if (count === 0) {
+						document.getElementById("no-results").textContent =
+							"No sites to show. Try adjusting your search?";
+					} else {
+						document.getElementById("no-results").textContent = "";
+					}
 				}
 			});
-
-			const count = document.querySelectorAll('#sites li:not([style*="none"])').length;
-			if (count === 0) {
-				document.getElementById('no-results').textContent = 'No sites to show. Try adjusting your search?';
-			} else {
-				document.getElementById('no-results').textContent = '';
-			}
-		}
-	});
-	</script>
-
-	<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2HMRXKDL4"></script>
-	<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-K2HMRXKDL4');</script>
-</body>
+		</script>
+	</body>
 </html>

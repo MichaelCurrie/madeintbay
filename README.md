@@ -4,30 +4,13 @@
 
 (Forked from https://github.com/dohnutt/madeinthesoo)
 
----
+The site's content and FAQ (why this exists, listing criteria, and how to get added) live on the page itself. To get a site listed, follow the "I'd like my site listed on here" section on [madeintbay.ca](https://www.madeintbay.ca) — email or open a pull request.
 
-## Why is this a thing?
+## How it's published
 
-Thunder Bay is a great place to call home, and it's full of talented web designers, web developers, programmers, UI and UX designers. The goals are:
+The site is plain static HTML/CSS with no build step. Everything served lives in [`public/`](public/).
 
-- to empower local developers and designers;
-- to highlight the Thunder Bay tech community;
-- and to raise awareness about the talent in Thunder Bay.
+- **Web server: GitHub Pages.** On every push to `main`, [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) uploads `public/` verbatim and deploys it to GitHub Pages (repo Settings → Pages → Source = GitHub Actions).
+- **Domain + DNS: Cloudflare.** `madeintbay.ca` is registered with Cloudflare Registrar, and its DNS is hosted at Cloudflare, which points the domain at GitHub Pages. The custom domain is pinned by [`public/CNAME`](public/CNAME).
 
-## How do you decide which sites to list?
-
-To be listed, a website must meet the following criteria:
-
-- It must have been designed and developed in Thunder Bay, Ontario, Canada.
-- It must be a website for an individual, a business, or an organization based in Thunder Bay.
-- It must be a website that is live and publicly accessible.
-
-## I'd like my site listed on here.
-
-1. [Send me an email](mailto:mcurrie@gmail.com) or [create a pull request](https://github.com/MichaelCurrie/madeintbay/pulls)—whichever you're most comfortable with. Include your name, your website URL, and some context about what the site is.
-
-2. Optionally add this code somewhere on your site:
-
-```html
-<a href="https://madeintbay.ca/">Made in TBay 🇨🇦</a>
-```
+In short: Cloudflare is the registrar and DNS host; GitHub Pages is the actual web server.
