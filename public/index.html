@@ -62,72 +62,7 @@
 				/>
 			</div>
 
-			<ul id="sites" class="grid" aria-live="polite">
-				<li class="card">
-					<a class="card__link" href="https://thunderbay.wiki" target="_blank" rel="noopener"
-						>thunderbay.wiki</a
-					>
-					<p class="card__desc">A community wiki of Thunder Bay biographies and local history.</p>
-					<p class="card__author">
-						<span class="card__label">creator</span>
-						<a href="https://www.michaelcurrie.com" target="_blank" rel="noopener"
-							>Michael B. Currie</a
-						>
-					</p>
-				</li>
-				<li class="card">
-					<a class="card__link" href="https://citycouncilmatters.ca" target="_blank" rel="noopener"
-						>citycouncilmatters.ca</a
-					>
-					<p class="card__desc">Plain-language recaps of Thunder Bay city council meetings.</p>
-					<p class="card__author">
-						<span class="card__label">creator</span>
-						<a href="https://tfcustom.ca/about/" target="_blank" rel="noopener">Taren Francisco</a>
-					</p>
-				</li>
-				<li class="card">
-					<a class="card__link" href="https://justthemenu.ca/" target="_blank" rel="noopener"
-						>justthemenu.ca</a
-					>
-					<p class="card__desc">Local restaurant menus gathered in one searchable place.</p>
-					<p class="card__author">
-						<span class="card__label">creator</span>
-						<a
-							href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
-							target="_blank"
-							rel="noopener"
-							>Stephen Garstin</a
-						>
-					</p>
-				</li>
-				<li class="card">
-					<a class="card__link" href="https://thundercitizen.ca/" target="_blank" rel="noopener"
-						>thundercitizen.ca</a
-					>
-					<p class="card__desc">Independent local news and community coverage for Thunder Bay.</p>
-					<p class="card__author">
-						<span class="card__label">creator</span>
-						<a href="https://www.linkedin.com/in/eric-richardson/" target="_blank" rel="noopener"
-							>Eric Richardson</a
-						>
-					</p>
-				</li>
-				<li class="card">
-					<a class="card__link" href="https://www.tbaytech.club/" target="_blank" rel="noopener"
-						>tbaytech.club</a
-					>
-					<p class="card__desc">A gathering spot for Thunder Bay's tech and developer community.</p>
-					<p class="card__author">
-						<span class="card__label">creator</span>
-						<a
-							href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
-							target="_blank"
-							rel="noopener"
-							>Stephen Garstin</a
-						>
-					</p>
-				</li>
-			</ul>
+			<ul id="sites" class="grid" aria-live="polite"></ul>
 
 			<div id="no-results" aria-live="assertive" aria-atomic="true"></div>
 		</main>
@@ -189,17 +124,133 @@
 		</footer>
 
 		<script>
-			// Randomize the site order on every load so no single listing is
-			// permanently first. Fisher-Yates shuffle, then re-append in the new
-			// order (appendChild moves existing nodes rather than cloning them).
-			(function shuffleSites() {
-				const list = document.getElementById("sites");
-				const items = Array.from(list.children);
+			// The listings are the single source of truth in public/sites.csv, so the
+			// only edit needed to add/remove/update a site is that one file. The page
+			// fetches it at load, renders one card per row, then shuffles. Rendering
+			// happens in JS (not baked into the HTML) specifically to keep the data and
+			// markup decoupled.
+
+			// Minimal RFC 4180 CSV parser: handles quoted fields, commas and newlines
+			// inside quotes, and "" as an escaped quote. Good enough for a hand-edited
+			// listings file; we deliberately avoid pulling in a dependency.
+			function parseCsv(text) {
+				const rows = [];
+				let row = [];
+				let field = "";
+				let inQuotes = false;
+				for (let i = 0; i < text.length; i++) {
+					const char = text[i];
+					if (inQuotes) {
+						if (char === '"') {
+							if (text[i + 1] === '"') {
+								field += '"';
+								i++;
+							} else {
+								inQuotes = false;
+							}
+						} else {
+							field += char;
+						}
+					} else if (char === '"') {
+						inQuotes = true;
+					} else if (char === ",") {
+						row.push(field);
+						field = "";
+					} else if (char === "\n" || char === "\r") {
+						// Close the current field/row on a line break, but collapse the
+						// \r\n pair (and any run of blank lines) so we don't emit empties.
+						if (field !== "" || row.length > 0) {
+							row.push(field);
+							rows.push(row);
+							row = [];
+							field = "";
+						}
+						if (char === "\r" && text[i + 1] === "\n") i++;
+					} else {
+						field += char;
+					}
+				}
+				if (field !== "" || row.length > 0) {
+					row.push(field);
+					rows.push(row);
+				}
+				return rows;
+			}
+
+			// Build the DOM via textContent/setAttribute (never innerHTML) so values
+			// from the CSV can't inject markup, and links keep the same
+			// target/rel hardening the original hand-written cards had.
+			function renderSite(site) {
+				const li = document.createElement("li");
+				li.className = "card";
+
+				const link = document.createElement("a");
+				link.className = "card__link";
+				link.href = site.url;
+				link.target = "_blank";
+				link.rel = "noopener";
+				link.textContent = site.name || site.url;
+				li.appendChild(link);
+
+				const desc = document.createElement("p");
+				desc.className = "card__desc";
+				desc.textContent = site.description || "";
+				li.appendChild(desc);
+
+				const author = document.createElement("p");
+				author.className = "card__author";
+				const label = document.createElement("span");
+				label.className = "card__label";
+				label.textContent = "creator";
+				author.appendChild(label);
+				author.append(" ");
+				if (site.creator_url) {
+					const creatorLink = document.createElement("a");
+					creatorLink.href = site.creator_url;
+					creatorLink.target = "_blank";
+					creatorLink.rel = "noopener";
+					creatorLink.textContent = site.creator;
+					author.appendChild(creatorLink);
+				} else {
+					author.append(site.creator || "");
+				}
+				li.appendChild(author);
+
+				return li;
+			}
+
+			// Fisher-Yates shuffle so no single listing is permanently first.
+			function shuffle(items) {
 				for (let i = items.length - 1; i > 0; i--) {
 					const j = Math.floor(Math.random() * (i + 1));
 					[items[i], items[j]] = [items[j], items[i]];
 				}
-				items.forEach((item) => list.appendChild(item));
+				return items;
+			}
+
+			(async function loadSites() {
+				const list = document.getElementById("sites");
+				try {
+					const response = await fetch("sites.csv");
+					if (!response.ok) throw new Error("HTTP " + response.status);
+					const rows = parseCsv(await response.text());
+					if (rows.length < 2) return;
+
+					const header = rows[0].map((h) => h.trim());
+					const sites = rows.slice(1).map((cells) => {
+						const site = {};
+						header.forEach((key, idx) => {
+							site[key] = (cells[idx] || "").trim();
+						});
+						return site;
+					});
+
+					shuffle(sites).forEach((site) => list.appendChild(renderSite(site)));
+				} catch (err) {
+					document.getElementById("no-results").textContent =
+						"Sorry, the list of sites could not be loaded.";
+					console.error("Failed to load sites.csv:", err);
+				}
 			})();
 
 			document.addEventListener("input", function (e) {
