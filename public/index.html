@@ -6,14 +6,14 @@
 		<title>Made in TBay 🇨🇦</title>
 		<meta
 			name="description"
-			content="A simple list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦"
+			content="A list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦"
 		/>
 		<meta property="og:locale" content="en_CA" />
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content="Made with ❤ in Thunder Bay" />
 		<meta
 			property="og:description"
-			content="A simple list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦"
+			content="A list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦"
 		/>
 		<meta property="og:url" content="https://madeintbay.ca/" />
 		<meta property="og:site_name" content="Made in Thunder Bay 🇨🇦" />
@@ -30,7 +30,7 @@
 				<img src="img/flag_tbay.webp" class="flag" width="64" height="32" alt="Thunder Bay flag" />
 			</h1>
 			<p class="lede">
-				A simple list of websites that were made in beautiful
+				A list of websites that were made in beautiful
 				<a href="https://thunderbay.wiki/wiki/Thunder_Bay">Thunder Bay, Ontario</a>.
 				<a href="#faq"><em>Why?</em></a>
 			</p>
@@ -48,69 +48,80 @@
 				/>
 			</div>
 
-			<ul id="sites" aria-live="polite">
-				<li>
-					<a href="https://thunderbay.wiki" target="_blank" rel="noopener"
-						>thunderbay.wiki</a
-					>
-					<span class="author"
-						>by
-						<a href="https://www.michaelcurrie.com" target="_blank" rel="noopener"
-							>Michael B. Currie</a
-						></span
-					>
-				</li>
-				<li>
-					<a href="https://citycouncilmatters.ca" target="_blank" rel="noopener"
-						>citycouncilmatters.ca</a
-					>
-					<span class="author"
-						>by
-						<a href="https://tfcustom.ca/about/" target="_blank" rel="noopener"
-							>Taren Francisco</a
-						></span
-					>
-				</li>
-				<li>
-					<a href="https://justthemenu.ca/" target="_blank" rel="noopener"
-						>justthemenu.ca</a
-					>
-					<span class="author"
-						>by
-						<a
-							href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
-							target="_blank"
-							rel="noopener"
-							>Stephen Garstin</a
-						></span
-					>
-				</li>
-				<li>
-					<a href="https://thundercitizen.ca/" target="_blank" rel="noopener"
-						>thundercitizen.ca</a
-					>
-					<span class="author"
-						>by
-						<a href="https://www.linkedin.com/in/eric-richardson/" target="_blank" rel="noopener"
-							>Eric Richardson</a
-						></span
-					>
-				</li>
-				<li>
-					<a href="https://www.tbaytech.club/" target="_blank" rel="noopener"
-						>tbaytech.club</a
-					>
-					<span class="author"
-						>by
-						<a
-							href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
-							target="_blank"
-							rel="noopener"
-							>Stephen Garstin</a
-						></span
-					>
-				</li>
-			</ul>
+			<table id="sites" aria-live="polite">
+				<thead>
+					<tr>
+						<th scope="col">Site</th>
+						<th scope="col">What it is</th>
+						<th scope="col">Creator</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="site">
+							<a href="https://thunderbay.wiki" target="_blank" rel="noopener">thunderbay.wiki</a>
+						</td>
+						<td class="desc">A community wiki of Thunder Bay biographies and local history.</td>
+						<td class="author">
+							<a href="https://www.michaelcurrie.com" target="_blank" rel="noopener"
+								>Michael B. Currie</a
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="site">
+							<a href="https://citycouncilmatters.ca" target="_blank" rel="noopener"
+								>citycouncilmatters.ca</a
+							>
+						</td>
+						<td class="desc">Plain-language recaps of Thunder Bay city council meetings.</td>
+						<td class="author">
+							<a href="https://tfcustom.ca/about/" target="_blank" rel="noopener">Taren Francisco</a>
+						</td>
+					</tr>
+					<tr>
+						<td class="site">
+							<a href="https://justthemenu.ca/" target="_blank" rel="noopener">justthemenu.ca</a>
+						</td>
+						<td class="desc">Local restaurant menus gathered in one searchable place.</td>
+						<td class="author">
+							<a
+								href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
+								target="_blank"
+								rel="noopener"
+								>Stephen Garstin</a
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="site">
+							<a href="https://thundercitizen.ca/" target="_blank" rel="noopener"
+								>thundercitizen.ca</a
+							>
+						</td>
+						<td class="desc">Independent local news and community coverage for Thunder Bay.</td>
+						<td class="author">
+							<a href="https://www.linkedin.com/in/eric-richardson/" target="_blank" rel="noopener"
+								>Eric Richardson</a
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="site">
+							<a href="https://www.tbaytech.club/" target="_blank" rel="noopener">tbaytech.club</a>
+						</td>
+						<td class="desc">A gathering spot for Thunder Bay's tech and developer community.</td>
+						<td class="author">
+							<a
+								href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
+								target="_blank"
+								rel="noopener"
+								>Stephen Garstin</a
+							>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 
 			<div id="no-results" aria-live="assertive" aria-atomic="true"></div>
 		</main>
@@ -176,30 +187,33 @@
 			// Randomize the site order on every load so no single listing is
 			// permanently first. Fisher-Yates shuffle, then re-append in the new
 			// order (appendChild moves existing nodes rather than cloning them).
+			// Only the tbody rows are shuffled; the header row stays put.
 			(function shuffleSites() {
-				const list = document.getElementById("sites");
-				const items = Array.from(list.children);
-				for (let i = items.length - 1; i > 0; i--) {
+				const body = document.querySelector("#sites tbody");
+				const rows = Array.from(body.children);
+				for (let i = rows.length - 1; i > 0; i--) {
 					const j = Math.floor(Math.random() * (i + 1));
-					[items[i], items[j]] = [items[j], items[i]];
+					[rows[i], rows[j]] = [rows[j], rows[i]];
 				}
-				items.forEach((item) => list.appendChild(item));
+				rows.forEach((row) => body.appendChild(row));
 			})();
 
 			document.addEventListener("input", function (e) {
 				if (e.target.id === "search") {
 					const query = e.target.value.toLowerCase();
 
-					document.querySelectorAll("#sites li").forEach((site) => {
-						const siteText = site.textContent.toLowerCase();
-						if (siteText.includes(query)) {
-							site.style.display = "";
+					document.querySelectorAll("#sites tbody tr").forEach((row) => {
+						const rowText = row.textContent.toLowerCase();
+						if (rowText.includes(query)) {
+							row.style.display = "";
 						} else {
-							site.style.display = "none";
+							row.style.display = "none";
 						}
 					});
 
-					const count = document.querySelectorAll('#sites li:not([style*="none"])').length;
+					const count = document.querySelectorAll(
+						'#sites tbody tr:not([style*="none"])',
+					).length;
 					if (count === 0) {
 						document.getElementById("no-results").textContent =
 							"No sites to show. Try adjusting your search?";

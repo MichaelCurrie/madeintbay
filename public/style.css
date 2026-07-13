@@ -164,33 +164,49 @@ a.muted,
 }
 
 #sites {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-#sites li {
 	width: 100%;
-	padding: 0.5em 0;
-	border-top: 1px solid var(--border-colour);
-	overflow: hidden;
-	text-overflow: ellipsis;
+	border-collapse: collapse;
+	margin: 0;
 }
 
-#sites li:last-child {
+#sites th,
+#sites td {
+	text-align: left;
+	padding: 0.5em 0.75em 0.5em 0;
+	vertical-align: baseline;
+	border-top: 1px solid var(--border-colour);
+}
+
+#sites thead th {
+	border-top: 0;
+	font-size: 0.8em;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: #666;
+}
+
+#sites tbody tr:last-child td {
 	border-bottom: 1px solid var(--border-colour);
 }
 
-#sites li * {
+#sites .site {
 	white-space: nowrap;
+}
+
+#sites .desc {
+	width: 100%;
+	font-size: 0.9em;
+	color: #333;
 }
 
 .author {
 	font-size: 0.8em;
 	color: #666;
+	white-space: nowrap;
 }
 
-#sites li:before {
+/* Prefix the site cell with the Thunder Bay flag as a visual marker. */
+#sites .site:before {
 	content: "" / "Thunder Bay flag";
 	width: 1.4em;
 	height: 0.7em;
@@ -202,8 +218,12 @@ a.muted,
 	background-repeat: no-repeat;
 	margin-inline-end: 0.5em;
 }
-#sites li + li {
-	margin-block-start: 0;
+
+/* On narrow screens, drop the description column so the table stays readable. */
+@media (max-width: 599px) {
+	#sites .desc {
+		display: none;
+	}
 }
 
 details {
