@@ -7,9 +7,8 @@
 The FAQ (why this exists, listing criteria, how to get added) lives on the page itself; see [`public/index.html`](public/index.html). 
 
 To add your site, just make a Pull Request editing [`public/sites.csv`](public/sites.csv).
-## How it Works (Step-by-Step Flow)
 
-### Architecture
+### Step-by-Step Flow
 
 When a user visits `madeintbay.ca`, this is what happens:
 
