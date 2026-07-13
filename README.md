@@ -1,6 +1,6 @@
-# madeintbay.ca
+# MadeInTBay.ca
 
-[madeintbay.ca](https://www.madeintbay.ca) — A list of websites that were made in Thunder Bay, Ontario, Canada.
+[MadeInTBay.ca](https://www.madeintbay.ca) — A list of websites that were made in Thunder Bay, Ontario, Canada.
 
 (Forked from https://github.com/dohnutt/madeinthesoo)
 

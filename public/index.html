@@ -20,6 +20,20 @@
 		<meta property="og:image" content="https://madeintbay.ca/img/opengraph.jpg" />
 		<link rel="icon" href="favicon.ico" sizes="any" />
 		<link rel="icon" href="img/flag_tbay.webp" type="image/webp" />
+		<link
+			rel="preload"
+			href="fonts/work-sans-latin.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin
+		/>
+		<link
+			rel="preload"
+			href="fonts/jetbrains-mono-latin.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin
+		/>
 		<link href="style.css" rel="stylesheet" />
 	</head>
 
@@ -48,80 +62,72 @@
 				/>
 			</div>
 
-			<table id="sites" aria-live="polite">
-				<thead>
-					<tr>
-						<th scope="col">Site</th>
-						<th scope="col">What it is</th>
-						<th scope="col">Creator</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td class="site">
-							<a href="https://thunderbay.wiki" target="_blank" rel="noopener">thunderbay.wiki</a>
-						</td>
-						<td class="desc">A community wiki of Thunder Bay biographies and local history.</td>
-						<td class="author">
-							<a href="https://www.michaelcurrie.com" target="_blank" rel="noopener"
-								>Michael B. Currie</a
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="site">
-							<a href="https://citycouncilmatters.ca" target="_blank" rel="noopener"
-								>citycouncilmatters.ca</a
-							>
-						</td>
-						<td class="desc">Plain-language recaps of Thunder Bay city council meetings.</td>
-						<td class="author">
-							<a href="https://tfcustom.ca/about/" target="_blank" rel="noopener">Taren Francisco</a>
-						</td>
-					</tr>
-					<tr>
-						<td class="site">
-							<a href="https://justthemenu.ca/" target="_blank" rel="noopener">justthemenu.ca</a>
-						</td>
-						<td class="desc">Local restaurant menus gathered in one searchable place.</td>
-						<td class="author">
-							<a
-								href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
-								target="_blank"
-								rel="noopener"
-								>Stephen Garstin</a
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="site">
-							<a href="https://thundercitizen.ca/" target="_blank" rel="noopener"
-								>thundercitizen.ca</a
-							>
-						</td>
-						<td class="desc">Independent local news and community coverage for Thunder Bay.</td>
-						<td class="author">
-							<a href="https://www.linkedin.com/in/eric-richardson/" target="_blank" rel="noopener"
-								>Eric Richardson</a
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="site">
-							<a href="https://www.tbaytech.club/" target="_blank" rel="noopener">tbaytech.club</a>
-						</td>
-						<td class="desc">A gathering spot for Thunder Bay's tech and developer community.</td>
-						<td class="author">
-							<a
-								href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
-								target="_blank"
-								rel="noopener"
-								>Stephen Garstin</a
-							>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<ul id="sites" class="grid" aria-live="polite">
+				<li class="card">
+					<a class="card__link" href="https://thunderbay.wiki" target="_blank" rel="noopener"
+						>thunderbay.wiki</a
+					>
+					<p class="card__desc">A community wiki of Thunder Bay biographies and local history.</p>
+					<p class="card__author">
+						<span class="card__label">creator</span>
+						<a href="https://www.michaelcurrie.com" target="_blank" rel="noopener"
+							>Michael B. Currie</a
+						>
+					</p>
+				</li>
+				<li class="card">
+					<a class="card__link" href="https://citycouncilmatters.ca" target="_blank" rel="noopener"
+						>citycouncilmatters.ca</a
+					>
+					<p class="card__desc">Plain-language recaps of Thunder Bay city council meetings.</p>
+					<p class="card__author">
+						<span class="card__label">creator</span>
+						<a href="https://tfcustom.ca/about/" target="_blank" rel="noopener">Taren Francisco</a>
+					</p>
+				</li>
+				<li class="card">
+					<a class="card__link" href="https://justthemenu.ca/" target="_blank" rel="noopener"
+						>justthemenu.ca</a
+					>
+					<p class="card__desc">Local restaurant menus gathered in one searchable place.</p>
+					<p class="card__author">
+						<span class="card__label">creator</span>
+						<a
+							href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
+							target="_blank"
+							rel="noopener"
+							>Stephen Garstin</a
+						>
+					</p>
+				</li>
+				<li class="card">
+					<a class="card__link" href="https://thundercitizen.ca/" target="_blank" rel="noopener"
+						>thundercitizen.ca</a
+					>
+					<p class="card__desc">Independent local news and community coverage for Thunder Bay.</p>
+					<p class="card__author">
+						<span class="card__label">creator</span>
+						<a href="https://www.linkedin.com/in/eric-richardson/" target="_blank" rel="noopener"
+							>Eric Richardson</a
+						>
+					</p>
+				</li>
+				<li class="card">
+					<a class="card__link" href="https://www.tbaytech.club/" target="_blank" rel="noopener"
+						>tbaytech.club</a
+					>
+					<p class="card__desc">A gathering spot for Thunder Bay's tech and developer community.</p>
+					<p class="card__author">
+						<span class="card__label">creator</span>
+						<a
+							href="https://www.linkedin.com/in/stephen-garstin-80358b2b2"
+							target="_blank"
+							rel="noopener"
+							>Stephen Garstin</a
+						>
+					</p>
+				</li>
+			</ul>
 
 			<div id="no-results" aria-live="assertive" aria-atomic="true"></div>
 		</main>
@@ -131,8 +137,7 @@
 				<summary>Why is this a thing?</summary>
 
 				<p>
-					Thunder Bay is a great place to call home, and it's full of talented web designers, web
-					developers, programmers, UI and UX designers. The goals are:
+					Thunder Bay is a great place to call home, and it's full of talented web designers, web developers, programmers, UI and UX designers. The goals are:
 				</p>
 				<ul>
 					<li><strong>to empower local developers and designers;</strong></li>
@@ -187,33 +192,30 @@
 			// Randomize the site order on every load so no single listing is
 			// permanently first. Fisher-Yates shuffle, then re-append in the new
 			// order (appendChild moves existing nodes rather than cloning them).
-			// Only the tbody rows are shuffled; the header row stays put.
 			(function shuffleSites() {
-				const body = document.querySelector("#sites tbody");
-				const rows = Array.from(body.children);
-				for (let i = rows.length - 1; i > 0; i--) {
+				const list = document.getElementById("sites");
+				const items = Array.from(list.children);
+				for (let i = items.length - 1; i > 0; i--) {
 					const j = Math.floor(Math.random() * (i + 1));
-					[rows[i], rows[j]] = [rows[j], rows[i]];
+					[items[i], items[j]] = [items[j], items[i]];
 				}
-				rows.forEach((row) => body.appendChild(row));
+				items.forEach((item) => list.appendChild(item));
 			})();
 
 			document.addEventListener("input", function (e) {
 				if (e.target.id === "search") {
 					const query = e.target.value.toLowerCase();
 
-					document.querySelectorAll("#sites tbody tr").forEach((row) => {
-						const rowText = row.textContent.toLowerCase();
-						if (rowText.includes(query)) {
-							row.style.display = "";
+					document.querySelectorAll("#sites li").forEach((site) => {
+						const siteText = site.textContent.toLowerCase();
+						if (siteText.includes(query)) {
+							site.style.display = "";
 						} else {
-							row.style.display = "none";
+							site.style.display = "none";
 						}
 					});
 
-					const count = document.querySelectorAll(
-						'#sites tbody tr:not([style*="none"])',
-					).length;
+					const count = document.querySelectorAll('#sites li:not([style*="none"])').length;
 					if (count === 0) {
 						document.getElementById("no-results").textContent =
 							"No sites to show. Try adjusting your search?";
