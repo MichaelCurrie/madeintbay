@@ -28,7 +28,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # enablement: true turns Pages on via the API (build type = workflow) if
+      # it isn't already, so the first run doesn't fail with "Get Pages site
+      # failed / Not Found" before anyone flips the Settings -> Pages toggle.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
