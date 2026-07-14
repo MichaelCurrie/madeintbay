@@ -17,9 +17,9 @@ When a user visits `madeintbay.ca`, this is what happens:
 | **1** | **Client Browser** | **DNS Query** | Initiates a DNS lookup for `madeintbay.ca`. |
 | **2** | **Cloudflare DNS** | **DNS Resolution** | Resolves the domain query, returning the authoritative IP addresses for GitHub Pages edge servers. |
 | **3** | **Client Browser** | **HTTP GET Request** | Establishes a TLS connection and sends an HTTP GET request for the root path (`/`) to the GitHub Pages IP. |
-| **4** | **GitHub Pages** | **Static File Delivery** | Validates the incoming host header against the repository's `CNAME` file, maps the request to the `public/` directory, and serves the static assets (`index.html`, `JS`, `CSS`) verbatim. |
+| **4** | **GitHub Pages** | **HTTP GET Response** | Validates the incoming host header against the repository's `CNAME` file, maps the request to the `public/` directory, and serves the static assets (`index.html`, `JS`, `CSS`) verbatim. |
 | **5** | **Client Browser** | **Asset Parsing** | Parses the DOM, fetches `public/js/main.js`, and begins client-side execution. |
-| **6** | **Client Browser (PapaParse)** | **Local Data Fetch & Parse** | Execution of `main.js` triggers a local fetch for `public/sites.csv`. The vendored `papaparse.min.js` library parses the CSV payload directly in the browser memory. |
+| **6** | **Client Browser** | **Local Data Fetch & Parse** | Execution of `main.js` triggers a local fetch for `public/sites.csv`. The vendored `papaparse.min.js` library parses the CSV payload directly in the browser memory. |
 | **7** | **Client Browser** | **DOM Manipulation** | Iterates through the parsed JSON objects array generated from the CSV data, dynamically constructing and injecting a card element into the DOM for each row. |
 
 ---
