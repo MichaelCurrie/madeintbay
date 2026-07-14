@@ -3,93 +3,14 @@
  * The listings are the single source of truth in public/sites.csv, so the only
  * edit needed to add, remove, or update a site is that one file. This script
  * fetches and parses that CSV at load, renders one card per row, then shuffles.
- * The same rows also drive a Schema.org JSON-LD graph injected into <head> for
- * search engines and AI crawlers — a presentation layer over the CSV, not a
- * second data store. Rendering happens here (not baked into the HTML)
- * specifically to keep the data and the markup decoupled. Parsing is delegated
- * to PapaParse (vendored at js/papaparse.min.js) rather than hand-rolled, so
- * edge cases like quoted fields, embedded commas/newlines, and escaped quotes
- * are handled correctly.
+ * Crawler-facing Schema.org JSON-LD is baked into index.html from the same CSV
+ * by scripts/embed_jsonld.mjs (at deploy / after CSV edits) so validators that
+ * do not execute JavaScript still see it. Rendering happens here (not baked
+ * into the HTML) specifically to keep the data and the markup decoupled.
+ * Parsing is delegated to PapaParse (vendored at js/papaparse.min.js) rather
+ * than hand-rolled, so edge cases like quoted fields, embedded commas/newlines,
+ * and escaped quotes are handled correctly.
  */
-
-const SITE_URL = "https://madeintbay.ca/";
-const SITE_NAME = "Made in TBay";
-const SITE_DESCRIPTION =
-	"A list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦";
-
-// Schema.org graph for crawlers. ItemList order matches the CSV (stable), not
-// the shuffled card order shown to visitors. textContent assignment keeps the
-// payload out of HTML parsing, so a </script> substring in a description cannot
-// break out of the script element.
-function injectJsonLd(sites) {
-	const itemListElement = sites.map((site, index) => {
-		const item = {
-			"@type": "WebSite",
-			name: site.name || site.url,
-			url: site.url,
-		};
-		if (site.description) {
-			item.description = site.description;
-		}
-		if (site.creator) {
-			const creator = { "@type": "Person", name: site.creator };
-			if (site.creator_url) {
-				creator.url = site.creator_url;
-			}
-			item.creator = creator;
-		}
-		return {
-			"@type": "ListItem",
-			position: index + 1,
-			item,
-		};
-	});
-
-	const graph = {
-		"@context": "https://schema.org",
-		"@graph": [
-			{
-				"@type": "WebSite",
-				"@id": `${SITE_URL}#website`,
-				name: SITE_NAME,
-				url: SITE_URL,
-				description: SITE_DESCRIPTION,
-				inLanguage: "en-CA",
-				about: {
-					"@type": "City",
-					name: "Thunder Bay",
-					containedInPlace: {
-						"@type": "AdministrativeArea",
-						name: "Ontario",
-						containedInPlace: {
-							"@type": "Country",
-							name: "Canada",
-						},
-					},
-				},
-			},
-			{
-				"@type": "ItemList",
-				"@id": `${SITE_URL}#listings`,
-				name: "Websites made in Thunder Bay",
-				description: SITE_DESCRIPTION,
-				numberOfItems: itemListElement.length,
-				itemListElement,
-			},
-		],
-	};
-
-	const existing = document.getElementById("sites-jsonld");
-	if (existing) {
-		existing.remove();
-	}
-
-	const script = document.createElement("script");
-	script.id = "sites-jsonld";
-	script.type = "application/ld+json";
-	script.textContent = JSON.stringify(graph);
-	document.head.appendChild(script);
-}
 
 // Build the DOM via textContent/setAttribute (never innerHTML) so values from
 // the CSV cannot inject markup, and links carry the target/rel hardening that
@@ -154,9 +75,7 @@ function loadSites() {
 		transform: (value) => value.trim(),
 		complete: (results) => {
 			const sites = results.data.filter((site) => site.url);
-			// JSON-LD first, from CSV order; cards get a separate shuffled copy.
-			injectJsonLd(sites);
-			shuffle([...sites]).forEach((site) => list.appendChild(renderSite(site)));
+			shuffle(sites).forEach((site) => list.appendChild(renderSite(site)));
 		},
 		error: (err) => {
 			document.getElementById("no-results").textContent =

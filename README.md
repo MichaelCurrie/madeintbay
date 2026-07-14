@@ -4,9 +4,9 @@
 
 (Forked from https://github.com/dohnutt/madeinthesoo)
 
-The FAQ (why this exists, listing criteria, how to get added) lives on the page itself; see [`public/index.html`](public/index.html). 
+The FAQ (why this exists, listing criteria, how to get added) lives on the page itself; see [`public/index.html`](public/index.html).
 
-To add your site, just make a Pull Request editing [`public/sites.csv`](public/sites.csv).
+To add your site, just make a Pull Request editing [`public/sites.csv`](public/sites.csv). After editing the CSV, run `node scripts/embed_jsonld.mjs` so the Schema.org JSON-LD in `index.html` stays in sync (CI also runs this before every Pages deploy).
 
 ### Step-by-Step Flow
 
@@ -17,17 +17,16 @@ When a user visits `madeintbay.ca`, this is what happens:
 | **1** | **Client Browser** | **DNS Query** | Initiates a DNS lookup for `madeintbay.ca`. |
 | **2** | **Cloudflare DNS** | **DNS Resolution** | Resolves the domain query, returning the authoritative IP addresses for GitHub Pages edge servers. |
 | **3** | **Client Browser** | **HTTP GET Request** | Establishes a TLS connection and sends an HTTP GET request for the root path (`/`) to the GitHub Pages IP. |
-| **4** | **GitHub Pages** | **HTTP GET Response** | Validates the incoming host header against the repository's `CNAME` file, maps the request to the `public/` directory, and serves the static assets (`index.html`, `JS`, `CSS`) verbatim. |
-| **5** | **Client Browser** | **Asset Parsing** | Parses the DOM, fetches `public/js/main.js`, and begins client-side execution. |
+| **4** | **GitHub Pages** | **HTTP GET Response** | Validates the incoming host header against the repository's `CNAME` file, maps the request to the `public/` directory, and serves the static assets (`index.html` with baked-in JSON-LD, `JS`, `CSS`) verbatim. |
+| **5** | **Client Browser** | **Asset Parsing** | Parses the DOM (including the static `application/ld+json` block in `<head>`), fetches `public/js/main.js`, and begins client-side execution. |
 | **6** | **Client Browser** | **Local Data Fetch & Parse** | Execution of `main.js` triggers a local fetch for `public/sites.csv`. The vendored `papaparse.min.js` library parses the CSV payload directly in the browser memory. |
-| **7** | **Client Browser** | **DOM Manipulation** | Iterates through the parsed JSON objects array generated from the CSV data, dynamically constructing and injecting a card element into the DOM for each row. |
-| **8** | **Client Browser** | **JSON-LD Injection** | From the same CSV rows (stable CSV order, not the shuffled card order), builds a Schema.org `WebSite` + `ItemList` graph and appends it as `application/ld+json` in `<head>` for search engines and AI crawlers. |
+| **7** | **Client Browser** | **DOM Manipulation** | Iterates through the parsed rows, dynamically constructing and injecting a card element into the DOM for each listing (shuffled for display). |
 
 ---
 
 ### Component Responsibilities
 
 * **Cloudflare:** Handles DNS management and edge routing, pointing the custom apex domain to the GitHub Pages infrastructure.
-* **GitHub Pages:** Acts exclusively as a static web server. It performs no server-side preprocessing or runtime build steps; it responds to HTTP requests by serving files directly from disk.
-* **Client Browser:** Handles 100% of the runtime computing. Because there is no backend compilation, the client asset pipeline is entirely responsible for data parsing, business logic, UI rendering, and emitting crawler-facing JSON-LD from `sites.csv`.
+* **GitHub Pages:** Acts as a static web server. Deploy CI runs `scripts/embed_jsonld.mjs` so `index.html` contains Schema.org JSON-LD derived from `sites.csv` before the artifact is uploaded.
+* **Client Browser:** Renders the interactive listing (parse CSV, shuffle cards, search). Crawler-facing structured data is already in the HTML; the browser does not regenerate it.
 * **robots.txt:** Explicitly allows every user-agent (including common AI crawlers); there are no `Disallow` rules.
