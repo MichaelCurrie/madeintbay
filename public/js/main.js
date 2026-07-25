@@ -3,10 +3,11 @@
  * The listings are the single source of truth in public/sites.csv, so the only
  * edit needed to add, remove, or update a site is that one file. This script
  * fetches and parses that CSV at load, renders one card per row, then shuffles.
- * Crawler-facing Schema.org JSON-LD is baked into index.html from the same CSV
- * by scripts/embed_jsonld.mjs (at deploy / after CSV edits) so validators that
- * do not execute JavaScript still see it. Rendering happens here (not baked
- * into the HTML) specifically to keep the data and the markup decoupled.
+ * Crawler-facing Schema.org JSON-LD is generated into index.html from the same
+ * CSV by scripts/embed_jsonld.mjs at deploy (the checked-in HTML keeps that
+ * block empty) so validators that do not execute JavaScript still see it.
+ * Rendering happens here (not baked into the HTML) specifically to keep the
+ * data and the markup decoupled.
  * Parsing is delegated to PapaParse (vendored at js/papaparse.min.js) rather
  * than hand-rolled, so edge cases like quoted fields, embedded commas/newlines,
  * and escaped quotes are handled correctly.

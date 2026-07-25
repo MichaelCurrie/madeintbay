@@ -7,7 +7,9 @@
  * served markup — client-side injection alone is invisible to them.
  *
  * Usage: node scripts/embed_jsonld.mjs
- * Runs in CI before the Pages artifact upload, and locally after editing sites.csv.
+ * Runs in CI before the Pages artifact upload. The checked-in index.html keeps
+ * the block empty (markers only) so sites.csv stays the only file to edit when
+ * adding a site; do not commit the generated output.
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
