@@ -16,78 +16,18 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { parseCsv } from "./csv.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CSV_PATH = join(ROOT, "public", "sites.csv");
 const HTML_PATH = join(ROOT, "public", "index.html");
 
 const SITE_URL = "https://madeintbay.ca/";
 const SITE_NAME = "Made in TBay";
-const SITE_DESCRIPTION =
-	"A list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦";
+const SITE_DESCRIPTION = "A list of websites that were made in beautiful Thunder Bay, Ontario 🇨🇦";
 
 const START_MARKER = "<!-- json-ld:start -->";
 const END_MARKER = "<!-- json-ld:end -->";
-
-// Minimal RFC 4180 CSV parse (headers + rows). Handles quoted fields, escaped
-// quotes, and CRLF. No dependency — keeps the Pages deploy free of npm install.
-function parseCsv(text) {
-	const rows = [];
-	let row = [];
-	let field = "";
-	let inQuotes = false;
-
-	for (let i = 0; i < text.length; i++) {
-		const char = text[i];
-		if (inQuotes) {
-			if (char === '"') {
-				if (text[i + 1] === '"') {
-					field += '"';
-					i++;
-				} else {
-					inQuotes = false;
-				}
-			} else {
-				field += char;
-			}
-		} else if (char === '"') {
-			inQuotes = true;
-		} else if (char === ",") {
-			row.push(field);
-			field = "";
-		} else if (char === "\n" || char === "\r") {
-			if (char === "\r" && text[i + 1] === "\n") {
-				i++;
-			}
-			row.push(field);
-			if (row.some((cell) => cell !== "")) {
-				rows.push(row);
-			}
-			row = [];
-			field = "";
-		} else {
-			field += char;
-		}
-	}
-	if (field !== "" || row.length > 0) {
-		row.push(field);
-		if (row.some((cell) => cell !== "")) {
-			rows.push(row);
-		}
-	}
-
-	if (rows.length === 0) {
-		return [];
-	}
-
-	const headers = rows[0].map((h) => h.trim());
-	return rows.slice(1).map((cells) => {
-		const obj = {};
-		headers.forEach((header, index) => {
-			obj[header] = (cells[index] ?? "").trim();
-		});
-		return obj;
-	});
-}
 
 function buildGraph(sites) {
 	const itemListElement = sites.map((site, index) => {
@@ -168,15 +108,13 @@ function embed(html, block) {
 	const start = html.indexOf(START_MARKER);
 	const end = html.indexOf(END_MARKER);
 	if (start === -1 || end === -1 || end < start) {
-		throw new Error(
-			`public/index.html must contain ${START_MARKER} … ${END_MARKER} markers`,
-		);
+		throw new Error(`public/index.html must contain ${START_MARKER} … ${END_MARKER} markers`);
 	}
 	const afterEnd = end + END_MARKER.length;
 	return html.slice(0, start) + block + html.slice(afterEnd);
 }
 
-const sites = parseCsv(readFileSync(CSV_PATH, "utf8")).filter((site) => site.url);
+const sites = parseCsv(readFileSync(CSV_PATH, "utf8")).rows.filter((site) => site.url);
 const html = readFileSync(HTML_PATH, "utf8");
 const updated = embed(html, jsonLdBlock(buildGraph(sites)));
 writeFileSync(HTML_PATH, updated, "utf8");

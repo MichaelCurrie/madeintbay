@@ -1,0 +1,36 @@
+# Formatting and lint gate for commits. Install once per clone with:
+#
+#   pre-commit install
+#
+# Run across the whole tree (not just staged files) with:
+#
+#   pre-commit run --all-files
+#
+# Hook versions are pinned so a commit is checked the same way on every machine;
+# `pre-commit autoupdate` moves the pins forward.
+
+repos:
+  # pre-commit/mirrors-prettier is archived upstream; rbubley's is the
+  # maintained successor and tracks the same version tags.
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.9.6
+    hooks:
+      - id: prettier
+        # Everything prettier understands here. Excluded paths live in
+        # .prettierignore so an editor-integrated prettier honours them too.
+        types_or: [javascript, css, html, markdown, yaml, json]
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v10.8.0
+    hooks:
+      - id: eslint
+        files: \.[cm]?js$
+        # Fail on warnings too: a rule worth enabling is worth not ignoring.
+        # --no-warn-ignored because pre-commit passes staged paths explicitly,
+        # and eslint warns when a named file is one its config ignores — which
+        # --max-warnings=0 would otherwise turn into a failure.
+        args: [--max-warnings=0, --no-warn-ignored]
+        additional_dependencies:
+          - eslint@10.8.0
+          - "@eslint/js@10.0.1"
+          - globals@17.7.0

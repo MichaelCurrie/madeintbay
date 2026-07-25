@@ -1,2 +1,8 @@
 .DS_Store
 img-src/
+
+# Written by scripts/fetch_icons.mjs at deploy: the vendored copies of each
+# listed site's favicon, and the between-runs cache that backs them. Both are
+# build output, like the JSON-LD embedded into index.html.
+public/img/icons/
+.cache/

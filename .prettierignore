@@ -1,0 +1,10 @@
+# Vendored third-party bundle: kept byte-identical to what upstream ships so it
+# can be diffed against a fresh download.
+public/js/papaparse.min.js
+
+# Build output from scripts/fetch_icons.mjs.
+public/img/icons/
+.cache/
+
+# Prettier has no CSV parser, and the column alignment here is hand-edited.
+*.csv

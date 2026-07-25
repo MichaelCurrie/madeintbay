@@ -1,15 +1,25 @@
 name: Deploy to GitHub Pages
 
-# Publishes the static site in public/ to GitHub Pages. Before upload,
-# scripts/embed_jsonld.mjs rewrites the JSON-LD block in index.html from
-# sites.csv so crawlers/validators that do not execute JS still see Schema.org
-# markup. Actions (not "deploy from a branch") is used because branch mode can
-# only serve the repo root or /docs, whereas the site lives in public/.
+# Publishes the static site in public/ to GitHub Pages. Two scripts run against
+# sites.csv before upload, so the published artifact differs from the checked-in
+# tree and neither script's output is committed:
+#   - fetch_icons.mjs downloads each listed site's favicon into public/img/icons/
+#     and points the CSV's generated icon column at the local copy, so visitors'
+#     browsers never request anything from a third-party domain.
+#   - embed_jsonld.mjs rewrites the JSON-LD block in index.html so crawlers and
+#     validators that do not execute JS still see Schema.org markup.
+# Actions (not "deploy from a branch") is used because branch mode can only
+# serve the repo root or /docs, whereas the site lives in public/.
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      refresh_icons:
+        description: Re-download every favicon, ignoring the cache TTL
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -33,8 +43,30 @@ jobs:
       # Settings first (the workflow token can't create the Pages site itself:
       # "Resource not accessible by integration").
       - uses: actions/configure-pages@v6
+
+      # Carries the downloaded icons between runs so a deploy does not depend on
+      # seventeen third-party sites all being reachable at that moment: anything
+      # still within the script's TTL is reused untouched, and anything whose
+      # host fails is served from the cached copy rather than dropped. The key
+      # ends in run_id so it never matches exactly and the cache is therefore
+      # always re-saved; the restore-keys are what actually warm-start it.
+      - name: Restore icon cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/icons
+          key: icons-${{ hashFiles('public/sites.csv') }}-${{ github.run_id }}
+          restore-keys: |
+            icons-${{ hashFiles('public/sites.csv') }}-
+            icons-
+
+      - name: Vendor favicons from sites.csv
+        env:
+          ICON_REFRESH: ${{ inputs.refresh_icons && '1' || '0' }}
+        run: node scripts/fetch_icons.mjs
+
       - name: Embed JSON-LD from sites.csv
         run: node scripts/embed_jsonld.mjs
+
       - uses: actions/upload-pages-artifact@v5
         with:
           path: ./public
