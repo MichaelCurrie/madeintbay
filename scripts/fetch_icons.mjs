@@ -8,13 +8,20 @@
  * it makes no third-party request and works offline, the same reason the fonts
  * are self-hosted and PapaParse is vendored.
  *
+ * Icons are found the way a browser finds them: read the page, take the
+ * <link rel="icon"> and web-app-manifest entries it declares, and only fall
+ * back to guessing /favicon.ico. A browser script could never do this — it
+ * cannot read a cross-origin page's markup — but this runs server-side, which
+ * is what lets it reach the icons that live at unguessable paths (WordPress
+ * puts them under /wp-content/uploads/, Vercel apps under /assets/).
+ *
  * sites.csv stays the editable source of truth, and the two icon columns are
  * kept separate so this script never consumes its own output: icon_source is
- * hand-edited and holds the absolute URL for sites that keep their icon
- * somewhere other than /favicon.ico, while icon is generated here and holds the
- * local path to the downloaded copy. Rows whose icon could not be fetched get
- * the Thunder Bay flag, so the browser never falls back over the network. Like
- * the JSON-LD, the generated column exists only in CI and is not committed.
+ * hand-edited and pins one absolute URL when the automatic pick is wrong, while
+ * icon is generated here and holds the local path to the downloaded copy. Rows
+ * with no usable icon get the Thunder Bay flag, so the browser never falls back
+ * over the network. Like the JSON-LD, the generated column exists only in CI
+ * and is not committed.
  *
  * Usage: node scripts/fetch_icons.mjs
  * Set ICON_REFRESH=1 to ignore the cache TTL and re-fetch everything.
@@ -26,6 +33,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parseCsv, stringifyCsv } from "./csv.mjs";
+import { imageExtension, visibleFraction } from "./image_probe.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CSV_PATH = join(ROOT, "public", "sites.csv");
@@ -45,81 +53,223 @@ const REFRESH = process.env.ICON_REFRESH === "1";
 
 const TIMEOUT_MS = 10_000;
 const MAX_BYTES = 512 * 1024;
+const HTML_MAX_BYTES = 2 * 1024 * 1024;
 const CONCURRENCY = 8;
+
+// Cards draw the icon at about 21 CSS pixels, so roughly 42 device pixels on a
+// 2x screen. Sources a little larger than that downscale cleanly; much larger
+// is just bytes, and 16x16 is visibly soft.
+const TARGET_PX = 96;
+const MAX_CANDIDATES = 6;
+
+// An icon that lands below this fraction of legible pixels is treated as
+// unusable. Measured against the real listings, genuine icons score 10% and up
+// while a white-on-transparent logo scores 0.00%, so anything in between is
+// comfortably outside the range either produces.
+const MIN_VISIBLE_FRACTION = 0.015;
 
 // Some hosts serve nothing useful to an unrecognised client. Identifying the
 // fetcher honestly and pointing at the site keeps it debuggable from their
 // access logs.
 const USER_AGENT = "Mozilla/5.0 (compatible; MadeInTBayIconBot/1.0; +https://madeintbay.ca/)";
 
-/**
- * Identify the image by magic bytes rather than trusting Content-Type, because
- * the failure this has to catch is a server answering 200 with an HTML error
- * page or an empty body. Returns the extension, or null if it is not an image.
- */
-function imageExtension(buf) {
-	if (buf.length < 16) {
-		return null;
-	}
-	if (buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
-		return "png";
-	}
-	if (buf.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff]))) {
-		return "jpg";
-	}
-	if (buf.subarray(0, 4).toString("ascii") === "GIF8") {
-		return "gif";
-	}
-	if (
-		buf.subarray(0, 4).toString("ascii") === "RIFF" &&
-		buf.subarray(8, 12).toString("ascii") === "WEBP"
-	) {
-		return "webp";
-	}
-	if (buf.subarray(0, 2).toString("ascii") === "BM") {
-		return "bmp";
-	}
-	// ICO and CUR share a header; byte 2 is the resource type.
-	if (
-		buf[0] === 0x00 &&
-		buf[1] === 0x00 &&
-		(buf[2] === 0x01 || buf[2] === 0x02) &&
-		buf[3] === 0x00
-	) {
-		return "ico";
-	}
-
-	const head = buf.subarray(0, 1024).toString("utf8").trimStart();
-	if (head.startsWith("<?xml") || head.startsWith("<svg") || head.startsWith("<!DOCTYPE svg")) {
-		const svg = buf.toString("utf8");
-		if (!/<svg[\s>]/i.test(svg)) {
-			return null;
+async function fetchResource(url, accept, maxBytes) {
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+	try {
+		const res = await fetch(url, {
+			redirect: "follow",
+			signal: controller.signal,
+			headers: { "User-Agent": USER_AGENT, Accept: accept },
+		});
+		if (!res.ok) {
+			return { error: `HTTP ${res.status}` };
 		}
-		// These files end up served from madeintbay.ca, and an SVG opened
-		// directly (not via <img>) runs its own script in this origin. Rather
-		// than rewrite someone else's markup, refuse anything with an active
-		// content vector and let the row fall back to the flag.
-		if (/<script[\s>]|\son\w+\s*=|javascript:|<foreignObject[\s>]/i.test(svg)) {
-			return null;
+		const buf = Buffer.from(await res.arrayBuffer());
+		if (buf.length === 0) {
+			return { error: "empty body" };
 		}
-		return "svg";
+		if (buf.length > maxBytes) {
+			return { error: `too large (${buf.length} bytes)` };
+		}
+		// Relative hrefs must resolve against wherever we actually landed, which
+		// is not the requested URL when a host redirects to www or to https.
+		return { buf, finalUrl: res.url || url };
+	} catch (err) {
+		return { error: err.name === "AbortError" ? "timed out" : err.message };
+	} finally {
+		clearTimeout(timer);
 	}
-
-	return null;
 }
 
-/** The URL to try for a site: the icon_source hint if given, else /favicon.ico. */
-function sourceUrl(site) {
-	// Guarded so a relative path in the hint column can never be handed to
-	// fetch() as if it were a remote address.
-	if (/^https?:\/\//i.test(site.icon_source ?? "")) {
-		return site.icon_source;
+function attrOf(tag, name) {
+	const match = tag.match(new RegExp(`\\b${name}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s"'>]+))`, "i"));
+	return match ? (match[2] ?? match[3] ?? match[4]).trim() : "";
+}
+
+/** Largest edge named by a sizes attribute; Infinity for the scalable "any". */
+function largestSize(sizes) {
+	if (/\bany\b/i.test(sizes)) {
+		return Infinity;
 	}
+	let best = 0;
+	for (const match of sizes.matchAll(/(\d+)\s*[x×]\s*(\d+)/gi)) {
+		best = Math.max(best, Number(match[1]), Number(match[2]));
+	}
+	return best;
+}
+
+function scoreCandidate(candidate) {
+	const px = largestSize(candidate.sizes);
+	const scalable =
+		px === Infinity || candidate.type === "image/svg+xml" || /\.svg(\?|#|$)/i.test(candidate.url);
+	if (scalable) {
+		return 100;
+	}
+
+	let score;
+	if (!px) {
+		// Unlabelled, so it could be any resolution; a declared icon is still a
+		// more deliberate choice than a path we guessed.
+		score = 55;
+	} else if (px >= 48 && px <= 256) {
+		score = 90 - Math.abs(px - TARGET_PX) / 32;
+	} else if (px > 256) {
+		score = 70;
+	} else if (px >= 32) {
+		score = 60;
+	} else {
+		score = 35;
+	}
+	if (/apple-touch-icon/.test(candidate.rel)) {
+		// Built for a home screen, so almost always square and fully opaque.
+		score += 4;
+	}
+	return score;
+}
+
+function parseIconLinks(html, base) {
+	const found = [];
+	for (const match of html.matchAll(/<link\b[^>]*>/gi)) {
+		const tag = match[0];
+		const rel = attrOf(tag, "rel").toLowerCase();
+		if (!/\bicon\b/.test(rel) || rel.includes("mask-icon")) {
+			// mask-icon is Safari's pinned-tab silhouette: one flat colour, and
+			// meaningless outside that context.
+			continue;
+		}
+		const href = attrOf(tag, "href");
+		if (!href) {
+			continue;
+		}
+		try {
+			found.push({
+				url: new URL(href, base).href,
+				sizes: attrOf(tag, "sizes"),
+				type: attrOf(tag, "type").toLowerCase(),
+				rel,
+			});
+		} catch {
+			// Unparseable href; nothing to fetch.
+		}
+	}
+	return found;
+}
+
+async function manifestIcons(html, base) {
+	const tag = [...html.matchAll(/<link\b[^>]*>/gi)]
+		.map((match) => match[0])
+		.find((candidate) => /\bmanifest\b/i.test(attrOf(candidate, "rel")));
+	if (!tag) {
+		return [];
+	}
+	let manifestUrl;
 	try {
-		return new URL("/favicon.ico", site.url).href;
+		manifestUrl = new URL(attrOf(tag, "href"), base).href;
 	} catch {
-		return null;
+		return [];
 	}
+	const res = await fetchResource(
+		manifestUrl,
+		"application/manifest+json,application/json",
+		MAX_BYTES,
+	);
+	if (res.error) {
+		return [];
+	}
+	let icons;
+	try {
+		icons = JSON.parse(res.buf.toString("utf8")).icons;
+	} catch {
+		return [];
+	}
+	if (!Array.isArray(icons)) {
+		return [];
+	}
+	return icons.flatMap((icon) => {
+		// Maskable icons are drawn with heavy bleed for the launcher to crop, so
+		// used as-is they look like a tiny logo adrift in padding.
+		if (!icon?.src || /maskable/i.test(icon.purpose ?? "")) {
+			return [];
+		}
+		try {
+			return [
+				{
+					url: new URL(icon.src, res.finalUrl).href,
+					sizes: icon.sizes ?? "",
+					type: (icon.type ?? "").toLowerCase(),
+					rel: "manifest",
+				},
+			];
+		} catch {
+			return [];
+		}
+	});
+}
+
+/** Ordered best-first list of icon URLs to try for a site. */
+async function discoverCandidates(pageUrl) {
+	const candidates = [];
+	const page = await fetchResource(pageUrl, "text/html,application/xhtml+xml", HTML_MAX_BYTES);
+	if (!page.error) {
+		const html = page.buf.toString("utf8");
+		candidates.push(...parseIconLinks(html, page.finalUrl));
+		candidates.push(...(await manifestIcons(html, page.finalUrl)));
+	}
+
+	const ranked = candidates
+		.map((candidate) => ({ ...candidate, score: scoreCandidate(candidate) }))
+		.sort((a, b) => b.score - a.score);
+
+	// The well-known location, tried last: plenty of sites declare nothing and
+	// still have one, but a declared icon is the more deliberate choice.
+	try {
+		ranked.push({ url: new URL("/favicon.ico", pageUrl).href, score: 0 });
+	} catch {
+		// Caller handles an empty list.
+	}
+
+	const seen = new Set();
+	return ranked
+		.filter((candidate) => !seen.has(candidate.url) && seen.add(candidate.url))
+		.slice(0, MAX_CANDIDATES);
+}
+
+/** Download one candidate and reject anything unusable, with the reason why. */
+async function tryCandidate(url) {
+	const res = await fetchResource(url, "image/*,*/*;q=0.8", MAX_BYTES);
+	if (res.error) {
+		return { error: res.error };
+	}
+	const ext = imageExtension(res.buf);
+	if (!ext) {
+		return { error: "not a usable image" };
+	}
+	const visible = visibleFraction(res.buf);
+	if (visible !== null && visible < MIN_VISIBLE_FRACTION) {
+		return { error: `invisible on a light background (${(visible * 100).toFixed(2)}% legible)` };
+	}
+	return { buf: res.buf, ext };
 }
 
 function slugFor(site) {
@@ -130,37 +280,6 @@ function slugFor(site) {
 		host = site.name || "site";
 	}
 	return host.replace(/[^a-z0-9.-]/gi, "-").toLowerCase();
-}
-
-async function download(url) {
-	const controller = new AbortController();
-	const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-	try {
-		const res = await fetch(url, {
-			redirect: "follow",
-			signal: controller.signal,
-			headers: { "User-Agent": USER_AGENT, Accept: "image/*,*/*;q=0.8" },
-		});
-		if (!res.ok) {
-			return { error: `HTTP ${res.status}` };
-		}
-		const buf = Buffer.from(await res.arrayBuffer());
-		if (buf.length === 0) {
-			return { error: "empty body" };
-		}
-		if (buf.length > MAX_BYTES) {
-			return { error: `too large (${buf.length} bytes)` };
-		}
-		const ext = imageExtension(buf);
-		if (!ext) {
-			return { error: "not a usable image" };
-		}
-		return { buf, ext };
-	} catch (err) {
-		return { error: err.name === "AbortError" ? "timed out" : err.message };
-	} finally {
-		clearTimeout(timer);
-	}
 }
 
 /** Run tasks with a small pool so one slow host does not serialise the rest. */
@@ -203,68 +322,78 @@ const now = Date.now();
 const ttlMs = TTL_DAYS * 24 * 60 * 60 * 1000;
 
 const outcomes = await pooled(sites, CONCURRENCY, async (site) => {
-	const src = sourceUrl(site);
-	if (!src) {
-		return { site, src, status: "no source" };
-	}
-
+	// Only an absolute http(s) URL is a usable pin. Anything else means "work it
+	// out", so re-running against an already-rewritten CSV stays idempotent.
+	const hint = /^https?:\/\//i.test(site.icon_source ?? "") ? site.icon_source : "";
 	const entry = cache[site.url];
 	const cachedPath = entry ? join(CACHE_DIR, entry.file) : null;
-	const cachedFresh =
+
+	if (
 		entry &&
-		entry.source === src &&
+		entry.hint === hint &&
 		!REFRESH &&
 		now - Date.parse(entry.fetchedAt) < ttlMs &&
-		existsSync(cachedPath);
-
-	if (cachedFresh) {
+		existsSync(cachedPath)
+	) {
+		// Fresh: reuse without touching the network at all, discovery included.
 		return {
 			site,
-			src,
+			src: entry.source,
 			status: "cached",
 			buf: readFileSync(cachedPath),
 			ext: entry.ext,
+			hint,
 			fetchedAt: entry.fetchedAt,
 		};
 	}
 
-	const result = await download(src);
-	if (result.error) {
-		// A host that is briefly down should not drop an icon the cache already
-		// holds, so a stale copy beats falling back to the flag. Its original
-		// timestamp is kept so the next deploy tries the network again.
-		if (entry && existsSync(cachedPath)) {
+	const candidates = hint ? [{ url: hint }] : await discoverCandidates(site.url);
+	const rejected = [];
+	for (const candidate of candidates) {
+		const result = await tryCandidate(candidate.url);
+		if (!result.error) {
 			return {
 				site,
-				src,
-				status: `stale (${result.error})`,
-				buf: readFileSync(cachedPath),
-				ext: entry.ext,
-				fetchedAt: entry.fetchedAt,
+				src: candidate.url,
+				status: "fetched",
+				buf: result.buf,
+				ext: result.ext,
+				hint,
+				fetchedAt: new Date(now).toISOString(),
 			};
 		}
-		// Failures are deliberately not cached, so the handful of sites with no
-		// icon are retried on every deploy and one that adds a favicon is picked
-		// up on the next push rather than after a negative entry expires.
-		return { site, src, status: `skipped (${result.error})` };
+		rejected.push(`${candidate.url} (${result.error})`);
 	}
-	return {
-		site,
-		src,
-		status: "fetched",
-		buf: result.buf,
-		ext: result.ext,
-		fetchedAt: new Date(now).toISOString(),
-	};
+
+	// A host that is briefly down should not drop an icon the cache already
+	// holds, so a stale copy beats falling back to the flag. Its original
+	// timestamp is kept so the next deploy tries the network again.
+	if (entry && existsSync(cachedPath)) {
+		return {
+			site,
+			src: entry.source,
+			status: "stale",
+			buf: readFileSync(cachedPath),
+			ext: entry.ext,
+			hint,
+			fetchedAt: entry.fetchedAt,
+		};
+	}
+	// Failures are deliberately not cached, so a site that gains a usable icon
+	// is picked up on the next push rather than after a negative entry expires.
+	return { site, hint, status: "flag", rejected };
 });
 
 const nextCache = {};
 let vendored = 0;
 
-for (const { site, src, status, buf, ext, fetchedAt } of outcomes) {
+for (const { site, src, status, buf, ext, hint, fetchedAt, rejected } of outcomes) {
 	if (!buf) {
 		site.icon = FALLBACK_ICON;
-		console.log(`  flag    ${site.url} — ${status}`);
+		console.log(`  flag    ${site.url}`);
+		for (const reason of rejected ?? []) {
+			console.log(`            tried ${reason}`);
+		}
 		continue;
 	}
 
@@ -280,8 +409,11 @@ for (const { site, src, status, buf, ext, fetchedAt } of outcomes) {
 
 	const cacheFile = `${slug}.${ext}`;
 	writeFileSync(join(CACHE_DIR, cacheFile), buf);
-	nextCache[site.url] = { source: src, file: cacheFile, ext, fetchedAt };
+	nextCache[site.url] = { source: src, hint, file: cacheFile, ext, fetchedAt };
 	console.log(`  ${status.padEnd(7)} ${site.url} -> ${file}`);
+	if (status === "fetched" && src) {
+		console.log(`            from ${src}`);
+	}
 }
 
 // Drop cache files for sites no longer listed so the cache cannot grow forever.
